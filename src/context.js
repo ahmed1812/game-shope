@@ -5,37 +5,88 @@ const ProductContext = React.createContext()
 
  class ProductProvider extends Component {
      state = {
-         products: storeProducts,
-         detailProduct
+         products: [],
+         detailProduct: detailProduct,
+         cart: [],
+         modalOpen: false,
+         modalProduct: detailProduct,
      };
-     handelDetail = () => {
-         console.log('hi detail')
+     componentDidMount() {
+         this.setProducts()
      }
-     addToCart = () => {
-         console.log('hi add cart')
+     setProducts = () => {
+       let tempProducts = [];
+       storeProducts.forEach(item => {
+           const singleItem = {...item}
+           tempProducts = [...tempProducts, singleItem]
+       })
+       this.setState( () =>{
+           return { products: tempProducts}
+       })
      }
-    //  tester = () => {
-    //      console.log('state products' , this.state.products[0].inCart);
-    //      console.log('data product', storeProducts[0].inCart);
 
-    //      const tempProducts = [...this.state.products];
-    //      tempProducts[0].inCart = true;
-    //      this.setState(
-    //          () => {
-    //              return { products: tempProducts };
-    //          },
-    //          () => {
-    //             console.log('state products' , this.state.products[0].inCart);
-    //             console.log('data product', storeProducts[0].inCart);
-    //          }
-    //     )
-    //  }
+     getItem = id => {
+         const product = this.state.products.find(item => item.id === id)
+         return product
+     }
+     handelDetail = id => {
+        const product = this.getItem(id);
+        this.setState( () => {
+            return { detailProduct: product}
+        })
+     }
+     addToCart = (id) => {
+       let tempProducts = [...this.state.products];
+       const index = tempProducts.indexOf(this.getItem(id));
+       const product  = tempProducts[index];
+       product.inCart = true;
+       product.count = 1;
+       const price = product.price;
+       product.total = price;
+       this.setState(
+           () => {
+               return { products: tempProducts, cart: [...this.state.cart, product]};
+           },
+            () => {
+                console.log(this.state)
+            }
+       )
+     }
+     openModal = id =>{
+         const product = this.getItem(id)
+         this.setState(() =>{
+             return{ modalProduct: product, modalOpen: true}
+         })
+     }
+    closeModal = ()=>{
+        this.setState(() =>{
+            return {modalOpen: false}
+        })
+    }
+    increment = id => {
+        console.log(' increment ')
+    }
+    decrement = id => {
+        console.log(' decrement ')
+    }
+    removeItem = id => {
+        console.log(' removeItem ')
+    }
+    clearCart = () =>{
+        console.log(' clear ')
+    }
     render() {
         return (
            <ProductContext.Provider value={{
                ...this.state,
                handelDetail: this.handelDetail,
-               addToCart: this.addToCart
+               addToCart: this.addToCart,
+               openModal: this.openModal,
+               closeModal: this.closeModal,
+               increment: this.increment,
+               decrement: this.decrement,
+               removeItem: this.removeItem,
+               clearCart: this.clearCart
            }} >
                {this.props.children}
            </ProductContext.Provider>
